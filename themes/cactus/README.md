@@ -1,3 +1,5 @@
+新建_config.yml，将_config-bak.yml的内容复制进来，然后添加githubId和secert。
+
 # Cactus
 
 A responsive, clean and simple [Hexo](http://hexo.io) theme for a personal website.

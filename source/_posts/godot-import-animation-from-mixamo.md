@@ -1,5 +1,5 @@
 ---
-title: 从mixamo导入人物动画到godot人
+title: 从mixamo导入人物动画到godot
 date: 2019-12-01 17:01:46
 tags: 
 - godot 

@@ -88,38 +88,32 @@ mixamo是adobe推出的3D动画在线服务平台，它提供了很多免费的�
 
 按照同样的方法，将defeated动画导入blender。
 
-然后将工程导出为escn格式：
-这部分需要额外的插件，具体看[这里](https://github.com/godotengine/godot-blender-exporter)。
+导入进来的动画可以在动作编辑器中看到(记得勾选伪用户)：
 
 ---
-![](/images/godot-import-animation-from-mixamo/8.png)
+![](/images/godot-import-animation-from-mixamo/12-2.png)
+当我们勾选伪用户以后，就可以在场景集合中把导入的包含骨架的动画删掉了。
+
+![](/images/godot-import-animation-from-mixamo/12-4.png)
+
+接下来我们将所有的动画`下推`，这样会将动画存放到NLA中，才会被godot导入：
+
+---
+![](/images/godot-import-animation-from-mixamo/12-5.png)
+
+可以看到，动画下面多出了一个NLA轨道，并且多了两个`action stash`，然后打开非线性动画：
+
+![](/images/godot-import-animation-from-mixamo/12-3.png)
+![](/images/godot-import-animation-from-mixamo/12-6.png)
+
+可以看到，两个动画都在轨道中了。
+
+然后将工程导出为gltf或者escn格式（目前godot对这两种的支持最好，escn需要安装额外的插件）。
 
 
 ## 导入到godot
 
-选择刚才导出的escn文件，打开：
+选择刚才导出的escn，直接打开即可。
 
 ---
 ![](/images/godot-import-animation-from-mixamo/9.png)
-
----
-![](/images/godot-import-animation-from-mixamo/9-1.png)
-
-现在我们把两个骨骼动画下的AnimationPlayer都移动到Tpose下：
-
----
-![](/images/godot-import-animation-from-mixamo/9-2.png)
-
-现在已经可以看到动画了：
-
----
-![](/images/godot-import-animation-from-mixamo/10.png)
-
-
-现在每一个animationplayer中只有一个动画，这样太冗余了。完全可以把他们放到一个player中，所以最后一步就是将不同animationplayer中的动画复制粘贴到一个里面即可。
-
-
----
-![](/images/godot-import-animation-from-mixamo/11.png)
-![](/images/godot-import-animation-from-mixamo/11-1.png)
-![](/images/godot-import-animation-from-mixamo/11-2.png)

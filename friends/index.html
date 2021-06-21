@@ -7,7 +7,7 @@
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="约伊兹的萌狼乡手札 julin flan 想装大神的技术渣 surine lzy">
-<meta name="keywords" content="godot 独立游戏">
+<meta name="keywords" content="godot 独立游戏 unity">
 <meta property="og:type" content="website">
 <meta property="og:title" content="friends">
 <meta property="og:url" content="http:&#x2F;&#x2F;068089dy.github.io&#x2F;friends&#x2F;index.html">
@@ -49,8 +49,7 @@
     
 </head>
 
-<body class="max-width mx-auto px3 ltr">
-    
+<body class="max-width mx-auto px3 ltr">    
     <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="content index py4">
         
           <header id="header">
@@ -146,8 +145,23 @@
 
 <!-- Baidu Analytics -->
 
-<!-- Disqus Comments --><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+<!-- Disqus Comments -->
 
 
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </body>
 </html>

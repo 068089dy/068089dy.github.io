@@ -7,7 +7,7 @@
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="参考：godot shading language文档Godot Advanced post-processingOpenGL投影矩阵 深度缓冲（z-buffer）与深度测试深度缓冲中存放了每一个点到视点的深度信息，离视点越近深度越浅。按理说离得近的物体会挡住离得远的，那么深度越浅自然也应该优先显示出来，深度测试就是来做这件事的，如果当前点的深度比缓冲区中对应的点要浅，那么就覆盖显示。 如何透视">
-<meta name="keywords" content="godot 独立游戏">
+<meta name="keywords" content="godot 独立游戏 unity">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Godot实现3D透视效果">
 <meta property="og:url" content="http:&#x2F;&#x2F;068089dy.github.io&#x2F;2019&#x2F;11&#x2F;16&#x2F;godot-3d-xray&#x2F;index.html">
@@ -54,8 +54,7 @@
     
 </head>
 
-<body class="max-width mx-auto px3 ltr">
-    
+<body class="max-width mx-auto px3 ltr">    
       <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
   <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
   <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
@@ -299,8 +298,23 @@
 
 <!-- Baidu Analytics -->
 
-<!-- Disqus Comments --><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+<!-- Disqus Comments -->
 
 
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </body>
 </html>

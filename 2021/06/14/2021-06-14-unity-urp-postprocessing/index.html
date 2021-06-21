@@ -14,10 +14,8 @@
 <meta property="og:site_name" content="068089DY">
 <meta property="og:description" content="1.内置渲染管线（Built-in）中的后处理通过在Camera上挂载类似这样的脚本：12345678public class ExampleClass : MonoBehaviour &amp;#123;     public Material mat;    void OnRenderImage(RenderTexture src, RenderTexture dest)     &amp;#123;">
 <meta property="og:locale" content="en">
-<meta property="og:image" content="http:&#x2F;&#x2F;068089dy.github.io&#x2F;images&#x2F;2021-06-14-unity-urp-postprocessing&#x2F;1.gif">
-<meta property="og:updated_time" content="2021-06-21T02:38:53.738Z">
+<meta property="og:updated_time" content="2021-06-21T02:47:59.848Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http:&#x2F;&#x2F;068089dy.github.io&#x2F;images&#x2F;2021-06-14-unity-urp-postprocessing&#x2F;1.gif">
     
     
         
@@ -152,8 +150,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p><img src="/images/2021-06-14-unity-urp-postprocessing/1.gif" alt="3"></p>
-<h2 id="1-内置渲染管线（Built-in）中的后处理"><a href="#1-内置渲染管线（Built-in）中的后处理" class="headerlink" title="1.内置渲染管线（Built-in）中的后处理"></a>1.内置渲染管线（Built-in）中的后处理</h2><p>通过在Camera上挂载类似这样的脚本：<br><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">ExampleClass</span> : <span class="title">MonoBehaviour</span> </span><br><span class="line">&#123; </span><br><span class="line">    <span class="keyword">public</span> Material mat;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">OnRenderImage</span>(<span class="params">RenderTexture src, RenderTexture dest</span>) </span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        Graphics.Blit(src, dest, mat); </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>就可以给相机添加后处理效果了。</p>
+    <h2 id="1-内置渲染管线（Built-in）中的后处理"><a href="#1-内置渲染管线（Built-in）中的后处理" class="headerlink" title="1.内置渲染管线（Built-in）中的后处理"></a>1.内置渲染管线（Built-in）中的后处理</h2><p>通过在Camera上挂载类似这样的脚本：<br><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">ExampleClass</span> : <span class="title">MonoBehaviour</span> </span><br><span class="line">&#123; </span><br><span class="line">    <span class="keyword">public</span> Material mat;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">OnRenderImage</span>(<span class="params">RenderTexture src, RenderTexture dest</span>) </span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        Graphics.Blit(src, dest, mat); </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>就可以给相机添加后处理效果了。</p>
 <h2 id="2-使用RenderTexture"><a href="#2-使用RenderTexture" class="headerlink" title="2.使用RenderTexture"></a>2.使用RenderTexture</h2><p>新建一个<code>RenderTexture</code>（Create-&gt;RenderTexture）,然后拖入到Camara下的OutputTexture配置项中，这样Camara就会将渲染好的图像输出到RenderTexture中，再新建一个材质，将RenderTexture拖入材质的BaseMap中，将材质放到一张Plane上（自定义的Mesh也可以），就可以看到Plane上已经显示出Camera拍摄的图像了。然后自己再自定义后处理shader，应用到材质上即可。</p>
 <h2 id="3-使用URP自带的一些后处理效果"><a href="#3-使用URP自带的一些后处理效果" class="headerlink" title="3.使用URP自带的一些后处理效果"></a>3.使用URP自带的一些后处理效果</h2><h3 id="在场景中新建Volume"><a href="#在场景中新建Volume" class="headerlink" title="在场景中新建Volume"></a>在场景中新建Volume</h3><p>URP提供了四种Volume：</p>
 <ul>

@@ -6,16 +6,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="1.原理每个fragment中都包含了深度信息，可以用深度信息和远近平面的值计算出每个fragment到Camera的距离，然后将指定距离范围内的点用不同的颜色显示。最后动态的调节这个指定范围就能实现扫描地形的效果了。 2.着色器具体操作在片元着色器中，算出像素点到Camera的距离： 注：_ProjectionParams参数，float4类型，x = 1.0(或如果当前使用翻转投影矩阵渲染则为">
+    <meta name="description" content="1.原理每个fragment中都包含了深度信息，可以用深度信息和远近平面的值计算出每个fragment到Camera的距离，然后将指定距离范围内的点用不同的颜色显示。最后动态的调节这个指定范围就能实现扫描地形的效果了。 2.着色器具体操作在片元着色器中，算出像素点到Camera的距离： 注：_ProjectionParams参数，float4类型，x = 1.0(或如果当前使用翻转投影矩阵渲染则">
 <meta name="keywords" content="unity,urp,着色器,shader,后处理,postprocessing">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Unity后处理实现地形扫描特效（URP）">
 <meta property="og:url" content="http:&#x2F;&#x2F;068089dy.github.io&#x2F;2021&#x2F;06&#x2F;21&#x2F;2021-06-15-unity-urp-scan&#x2F;index.html">
 <meta property="og:site_name" content="068089DY">
-<meta property="og:description" content="1.原理每个fragment中都包含了深度信息，可以用深度信息和远近平面的值计算出每个fragment到Camera的距离，然后将指定距离范围内的点用不同的颜色显示。最后动态的调节这个指定范围就能实现扫描地形的效果了。 2.着色器具体操作在片元着色器中，算出像素点到Camera的距离： 注：_ProjectionParams参数，float4类型，x = 1.0(或如果当前使用翻转投影矩阵渲染则为">
+<meta property="og:description" content="1.原理每个fragment中都包含了深度信息，可以用深度信息和远近平面的值计算出每个fragment到Camera的距离，然后将指定距离范围内的点用不同的颜色显示。最后动态的调节这个指定范围就能实现扫描地形的效果了。 2.着色器具体操作在片元着色器中，算出像素点到Camera的距离： 注：_ProjectionParams参数，float4类型，x = 1.0(或如果当前使用翻转投影矩阵渲染则">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2021-06-21T02:42:20.889Z">
+<meta property="og:image" content="http:&#x2F;&#x2F;068089dy.github.io&#x2F;images&#x2F;2021-06-14-unity-urp-postprocessing&#x2F;1.gif">
+<meta property="og:updated_time" content="2021-06-21T02:47:58.142Z">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;068089dy.github.io&#x2F;images&#x2F;2021-06-14-unity-urp-postprocessing&#x2F;1.gif">
     
     
         
@@ -148,7 +150,8 @@
   
 
   <div class="content" itemprop="articleBody">
-    <h2 id="1-原理"><a href="#1-原理" class="headerlink" title="1.原理"></a>1.原理</h2><p>每个<code>fragment</code>中都包含了深度信息，可以用深度信息和远近平面的值计算出每个<code>fragment</code>到<code>Camera</code>的距离，然后将指定距离范围内的点用不同的颜色显示。最后动态的调节这个指定范围就能实现扫描地形的效果了。</p>
+    <p><img src="/images/2021-06-14-unity-urp-postprocessing/1.gif" alt="3"></p>
+<h2 id="1-原理"><a href="#1-原理" class="headerlink" title="1.原理"></a>1.原理</h2><p>每个<code>fragment</code>中都包含了深度信息，可以用深度信息和远近平面的值计算出每个<code>fragment</code>到<code>Camera</code>的距离，然后将指定距离范围内的点用不同的颜色显示。最后动态的调节这个指定范围就能实现扫描地形的效果了。</p>
 <h2 id="2-着色器具体操作"><a href="#2-着色器具体操作" class="headerlink" title="2.着色器具体操作"></a>2.着色器具体操作</h2><p>在片元着色器中，算出像素点到Camera的距离：</p>
 <p>注：_ProjectionParams参数，float4类型，x = 1.0(或如果当前使用翻转投影矩阵渲染则为-1.0),y是相机的近平面,z是相机的远平面，w是1 / FarPlane<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span> rawDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, sampler_CameraDepthTexture, input.uv);</span><br><span class="line"><span class="keyword">float</span> depth = Linear01Depth(rawDepth, _ZBufferParams);</span><br><span class="line"><span class="keyword">float</span> dist = depth * _ProjectionParams.z;</span><br></pre></td></tr></table></figure></p>
 <p>然后在指定范围内给出相应的颜色：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (dist &lt; _ScanDistance &amp;&amp; dist &gt; _ScanDistance-_ScanWidth) &#123;</span><br><span class="line">    <span class="keyword">float</span> l = (dist - _ScanDistance + _ScanWidth) / _ScanWidth;</span><br><span class="line">    col = col * (<span class="number">1</span>-l) + _BaseColor * l;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>

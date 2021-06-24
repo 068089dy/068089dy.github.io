@@ -55,6 +55,10 @@ vignette：晕映（有点望远镜黑圈的意思）
 首先，新建一个继承ScriptableRendererFeature的脚本
 
 ```c#
+// 记得加这两行，不然setting显示不出来
+using System.Collections;
+using System.Collections.Generic;
+
 public class CustomRender : ScriptableRendererFeature
 {
     CustomRenderPass customRenderPass;

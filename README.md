@@ -11,3 +11,4 @@ hexo server
 hexo g
 
 ## 发布
+hexo clean && hexo g && hexo d

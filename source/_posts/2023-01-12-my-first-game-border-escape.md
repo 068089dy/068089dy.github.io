@@ -1,5 +1,5 @@
 ---
-title: 我独立开发的第一款游戏
+title: 我开发的第一款游戏
 date: 2023-01-12 17:01:46
 tags: 
 - unity 
@@ -45,8 +45,10 @@ __离职已有半年了，这期间主要的成果就是开发并上架了我的
 ## 游戏地址
 [Steam](https://store.steampowered.com/app/2195240/_border_escape/)
 [Taptap(试玩)](https://www.taptap.cn/app/240808)
-[GooglePlay(试玩)(即将上架)]()
+GooglePlay(试玩)(即将上架)
+微信小游戏：
+![](/images/2023-01-12-my-first-game-border-escape/gh_d28ed26f630b_258.jpg)
 
 ## 总结
 
-虽然没什么销量，但能完成这款游戏，咱心里还是很满足的，算是迈出了第一步。
+虽然没什么销量，但能完成这款游戏，心里还是很满足的，算是迈出了第一步。

@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://068089dy.github.io/"/>
-  <updated>2025-12-26T09:34:16.068Z</updated>
+  <updated>2025-12-26T09:36:35.818Z</updated>
   <id>http://068089dy.github.io/</id>
   
   <author>
@@ -18,10 +18,10 @@
   
   <entry>
     <title>Unity DOTS学习记录(一)-ECS架构</title>
-    <link href="http://068089dy.github.io/2025/12/26/2015-12-26-unity-dots-1/"/>
-    <id>http://068089dy.github.io/2025/12/26/2015-12-26-unity-dots-1/</id>
+    <link href="http://068089dy.github.io/2025/12/26/2025-12-26-unity-dots-1/"/>
+    <id>http://068089dy.github.io/2025/12/26/2025-12-26-unity-dots-1/</id>
     <published>2025-12-26T09:01:46.000Z</published>
-    <updated>2025-12-26T09:34:16.068Z</updated>
+    <updated>2025-12-26T09:36:35.818Z</updated>
     
     <content type="html"><![CDATA[<h2 id="Unity-DOTS-简介"><a href="#Unity-DOTS-简介" class="headerlink" title="Unity DOTS 简介"></a>Unity DOTS 简介</h2><p>Unity 的 DOTS（Data-Oriented Technology Stack，面向数据的技术栈）<br>是一套基于 ECS 架构 构建的 高性能开发框架，主要用于解决 海量对象、高并发计算 场景下的性能问题，例如大量单位移动、战斗、AI 计算等。</p><h2 id="ECS-架构说明"><a href="#ECS-架构说明" class="headerlink" title="ECS 架构说明"></a>ECS 架构说明</h2><p>ECS 是 Entity（实体）– Component（组件）– System（系统） 的缩写，其核心思想是 数据与行为分离。</p><h3 id="1-Entity（实体）"><a href="#1-Entity（实体）" class="headerlink" title="1. Entity（实体）"></a>1. Entity（实体）</h3><p>实体用于表示一个具体的“单位”，例如：</p><ul><li>一个敌人</li><li>一颗子弹</li><li>一个建筑</li></ul><p>实体的本质只是一个 ID（标识符），本身不包含任何数据或逻辑。</p><h3 id="2-Component（组件）"><a href="#2-Component（组件）" class="headerlink" title="2. Component（组件）"></a>2. Component（组件）</h3><p>组件是 挂载在实体上的纯数据，用于描述实体的属性状态，例如：</p><ul><li>移动速度</li><li>攻击冷却时间</li><li>伤害数值</li><li>生命值</li></ul><p>在 DOTS 中：</p><ul><li>组件使用 struct（结构体）</li><li>不包含行为逻辑</li><li>不产生 GC</li></ul><h3 id="3-System（系统）"><a href="#3-System（系统）" class="headerlink" title="3. System（系统）"></a>3. System（系统）</h3><p>系统用于 批量处理具有特定组件组合的实体，是真正编写逻辑的地方，例如：</p><ul><li>移动系统</li><li>攻击系统</li><li>AI 系统</li></ul><p>系统会遍历满足条件的实体集合，并对其数据进行统一处理。</p><h2 id="DOTS-高性能的原因："><a href="#DOTS-高性能的原因：" class="headerlink" title="DOTS 高性能的原因："></a>DOTS 高性能的原因：</h2><h3 id="传统方式（GameObject-MonoBehaviour）"><a href="#传统方式（GameObject-MonoBehaviour）" class="headerlink" title="传统方式（GameObject + MonoBehaviour）"></a>传统方式（GameObject + MonoBehaviour）</h3><p>传统 Unity 开发中：</p><ul><li>以 GameObject 作为载体</li><li>将多个 Component（类对象） 挂载其上</li><li>每个对象通常有自己的 Update() 调用</li></ul><p>这种方式的优点是：</p><ul><li>面向对象</li><li>易理解</li><li>开发效率高</li></ul><p>但缺点也非常明显：</p><ul><li>对象数量多，内存分散</li><li>Cache 命中率低</li><li>GC 不可控</li><li>基本运行在主线程</li></ul><p>在大量单位场景下，性能瓶颈明显。</p><h3 id="DOTS-方式（数据导向）"><a href="#DOTS-方式（数据导向）" class="headerlink" title="DOTS 方式（数据导向）"></a>DOTS 方式（数据导向）</h3><p>在 DOTS 中：</p><ul><li>Entity 和 Component 都是纯数据</li><li>Component 使用结构体，内存连续，不产生 GC</li><li>System 统一批量处理数据，而不是逐对象调用逻辑</li></ul><p>同时，DOTS 还结合了多项底层优化技术：</p><ul><li>高效的 Entity 查询机制</li><li>Unity.Mathematics 数学库（SIMD 友好）</li><li>Burst Compiler 将 C# 代码编译为高度优化的本地机器码</li><li>Job System 支持多线程并行执行，大幅提升 CPU 利用率</li></ul>]]></content>
     
@@ -221,11 +221,11 @@
     
       <category term="postprocessing" scheme="http://068089dy.github.io/tags/postprocessing/"/>
     
-      <category term="后处理" scheme="http://068089dy.github.io/tags/%E5%90%8E%E5%A4%84%E7%90%86/"/>
-    
       <category term="shader" scheme="http://068089dy.github.io/tags/shader/"/>
     
       <category term="着色器" scheme="http://068089dy.github.io/tags/%E7%9D%80%E8%89%B2%E5%99%A8/"/>
+    
+      <category term="后处理" scheme="http://068089dy.github.io/tags/%E5%90%8E%E5%A4%84%E7%90%86/"/>
     
   </entry>
   
@@ -261,10 +261,10 @@
   
   <entry>
     <title>从mixamo导入人物动画到godot</title>
-    <link href="http://068089dy.github.io/2019/12/01/godot-import-animation-from-mixamo/"/>
-    <id>http://068089dy.github.io/2019/12/01/godot-import-animation-from-mixamo/</id>
+    <link href="http://068089dy.github.io/2019/12/01/2019-12-01-godot-import-animation-from-mixamo/"/>
+    <id>http://068089dy.github.io/2019/12/01/2019-12-01-godot-import-animation-from-mixamo/</id>
     <published>2019-12-01T09:01:46.000Z</published>
-    <updated>2025-12-26T09:34:16.073Z</updated>
+    <updated>2025-12-26T09:37:04.255Z</updated>
     
     <content type="html"><![CDATA[<p>环境：</p><ul><li>blender2.8</li><li>godot3.2</li></ul><p>mixamo是adobe推出的3D动画在线服务平台，它提供了很多免费的角色和动画，并且可以自动绑骨。用户可以上传自己的模型，然后简单的选中关节后，就可以将资源库里的所有动作应用到我们的模型上面。</p><p>接下来演示如何将mixamo上的模型动画导入到godot中。</p><p>首先，进入<a href="https://www.mixamo.com/" target="_blank" rel="noopener">官网</a>。注册登录后，就来到了这个页面：</p><hr><p><img src="/images/godot-import-animation-from-mixamo/1.png" alt=""></p><h2 id="下载模型和动画"><a href="#下载模型和动画" class="headerlink" title="下载模型和动画"></a>下载模型和动画</h2><p>这里就选用默认的模型为例：</p><p>第一步先不需要选动作，直接将这个T-pose下载下来：</p><hr><p><img src="/images/godot-import-animation-from-mixamo/2.png" alt=""></p><p>然后选中一个动画，预览区会出现绑定该动画后的模型动画：</p><hr><p><img src="/images/godot-import-animation-from-mixamo/3.png" alt=""></p><p>点击下载，选择without skin选项，只下载骨骼动画，不下载模型。</p><hr><p><img src="/images/godot-import-animation-from-mixamo/4.png" alt=""></p><p>按照上面的步骤再下载一个动画，这里我下载了defeated。</p><p>这样，我们就有了三个文件：</p><hr><p><img src="/images/godot-import-animation-from-mixamo/5.png" alt=""></p><h2 id="使用blender处理模型和动画"><a href="#使用blender处理模型和动画" class="headerlink" title="使用blender处理模型和动画"></a>使用blender处理模型和动画</h2><p>接下来，打开blender，新建一个空工程，然后导入xbot.fbx:</p><hr><p><img src="/images/godot-import-animation-from-mixamo/6.png" alt=""></p><hr><p><img src="/images/godot-import-animation-from-mixamo/6-1.png" alt=""></p><p>继续导入一个动画文件：</p><hr><p><img src="/images/godot-import-animation-from-mixamo/6-2.png" alt=""></p><p><img src="/images/godot-import-animation-from-mixamo/6-3.png" alt=""></p><p>现在，切换到动画摄影表：</p><hr><p><img src="/images/godot-import-animation-from-mixamo/7.png" alt=""></p><p>选择动作编辑器（action editor）</p><hr><p><img src="/images/godot-import-animation-from-mixamo/7-2.png" alt=""></p><p>先选中t-pose模型，再选中“跑”动画。</p><hr><p><img src="/images/godot-import-animation-from-mixamo/7-3.png" alt=""></p><p>然后空格播放，这样角色就跑起来了：</p><hr><p><img src="/images/godot-import-animation-from-mixamo/a.gif" alt=""></p><p>按照同样的方法，将defeated动画导入blender。</p><p>导入进来的动画可以在动作编辑器中看到(记得勾选伪用户)：</p><hr><p><img src="/images/godot-import-animation-from-mixamo/12-2.png" alt=""><br>当我们勾选伪用户以后，就可以在场景集合中把导入的包含骨架的动画删掉了。</p><p><img src="/images/godot-import-animation-from-mixamo/12-4.png" alt=""></p><p>接下来我们将所有的动画<code>下推</code>，这样会将动画存放到NLA中，才会被godot导入：</p><hr><p><img src="/images/godot-import-animation-from-mixamo/12-5.png" alt=""></p><p>可以看到，动画下面多出了一个NLA轨道，并且多了两个<code>action stash</code>，然后打开非线性动画：</p><p><img src="/images/godot-import-animation-from-mixamo/12-3.png" alt=""><br><img src="/images/godot-import-animation-from-mixamo/12-6.png" alt=""></p><p>可以看到，两个动画都在轨道中了。</p><p>然后将工程导出为gltf或者escn格式（目前godot对这两种的支持最好，escn需要安装额外的插件）。</p><h2 id="导入到godot"><a href="#导入到godot" class="headerlink" title="导入到godot"></a>导入到godot</h2><p>选择刚才导出的escn，直接打开即可。</p><hr><p><img src="/images/godot-import-animation-from-mixamo/9.png" alt=""></p>]]></content>
     
@@ -294,8 +294,8 @@
   
   <entry>
     <title>Godot实现3D透视效果</title>
-    <link href="http://068089dy.github.io/2019/11/16/godot-3d-xray/"/>
-    <id>http://068089dy.github.io/2019/11/16/godot-3d-xray/</id>
+    <link href="http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/"/>
+    <id>http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/</id>
     <published>2019-11-16T09:01:46.000Z</published>
     <updated>2025-12-26T09:34:16.073Z</updated>
     

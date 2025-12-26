@@ -9,7 +9,7 @@
     <meta name="description" content="参考：godot shading language文档Godot Advanced post-processingOpenGL投影矩阵 深度缓冲（z-buffer）与深度测试深度缓冲中存放了每一个点到视点的深度信息，离视点越近深度越浅。按理说离得近的物体会挡住离得远的，那么深度越浅自然也应该优先显示出来，深度测试就是来做这件事的，如果当前点的深度比缓冲区中对应的点要浅，那么就覆盖显示。 如何透视">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Godot实现3D透视效果">
-<meta property="og:url" content="http://068089dy.github.io/2019/11/16/godot-3d-xray/index.html">
+<meta property="og:url" content="http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/index.html">
 <meta property="og:site_name" content="068089DY">
 <meta property="og:description" content="参考：godot shading language文档Godot Advanced post-processingOpenGL投影矩阵 深度缓冲（z-buffer）与深度测试深度缓冲中存放了每一个点到视点的深度信息，离视点越近深度越浅。按理说离得近的物体会挡住离得远的，那么深度越浅自然也应该优先显示出来，深度测试就是来做这件事的，如果当前点的深度比缓冲区中对应的点要浅，那么就覆盖显示。 如何透视">
 <meta property="og:locale" content="en_US">
@@ -60,7 +60,8 @@
     
 <meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
 
-<body class="max-width mx-auto px3 ltr">    
+<body class="max-width mx-auto px3 ltr">
+    
       <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
   <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
   <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
@@ -87,7 +88,7 @@
     <span id="actions">
       <ul>
         
-        <li><a class="icon" href="/2019/12/01/godot-import-animation-from-mixamo/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        <li><a class="icon" href="/2019/12/01/2019-12-01-godot-import-animation-from-mixamo/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
         
         
         <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
@@ -101,16 +102,16 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://068089dy.github.io/2019/11/16/godot-3d-xray/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&text=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&is_video=false&description=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Godot实现3D透视效果&body=Check out this article: http://068089dy.github.io/2019/11/16/godot-3d-xray/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&name=Godot实现3D透视效果&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&text=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&is_video=false&description=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Godot实现3D透视效果&body=Check out this article: http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&name=Godot实现3D透视效果&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -216,16 +217,16 @@
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://068089dy.github.io/2019/11/16/godot-3d-xray/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&text=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&is_video=false&description=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Godot实现3D透视效果&body=Check out this article: http://068089dy.github.io/2019/11/16/godot-3d-xray/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&name=Godot实现3D透视效果&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&text=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&is_video=false&description=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Godot实现3D透视效果&body=Check out this article: http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://068089dy.github.io/2019/11/16/2019-11-16-godot-3d-xray/&name=Godot实现3D透视效果&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -316,23 +317,8 @@
 
 <!-- Baidu Analytics -->
 
-<!-- Disqus Comments -->
+<!-- Disqus Comments --><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 
 
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {
-            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
-            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-            processEscapes: true
-        }
-    });
-    MathJax.Hub.Queue(function() {
-        var all = MathJax.Hub.getAllJax();
-        for (var i = 0; i < all.length; ++i)
-            all[i].SourceElement().parentNode.className += ' has-jax';
-    });
-</script>
-<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
 </body>
 </html>

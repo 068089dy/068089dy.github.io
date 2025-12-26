@@ -138,34 +138,6 @@
   </entry>
   
   <entry>
-    <title>Unity批处理</title>
-    <link href="http://068089dy.github.io/2022/06/24/2021-06-24-unity-draw-call-batching/"/>
-    <id>http://068089dy.github.io/2022/06/24/2021-06-24-unity-draw-call-batching/</id>
-    <published>2022-06-24T09:01:46.000Z</published>
-    <updated>2025-12-26T09:49:47.433Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="1-为什么使用批处理？"><a href="#1-为什么使用批处理？" class="headerlink" title="1.为什么使用批处理？"></a>1.为什么使用批处理？</h2><p>商店进货时，进货量越大，总的运输成本就越低。比如一次运一千箱；和每次运一箱，运一千次，肯定后者的开销更大。</p><p>图形渲染时也一样，CPU在向GPU发起DrawCall时，每次要尽可能多的传输数据，来减少调用次数。</p><h2 id="2-如何减少DrawCall"><a href="#2-如何减少DrawCall" class="headerlink" title="2.如何减少DrawCall"></a>2.如何减少DrawCall</h2><p>1.在建模时，将大量的模型合并成一个网格，这样CPU就可以一次DrawCall把数据传给GPU。但是这种方法不够灵活，模型在unity中无法修改。</p><p>2.使用批处理。</p><h2 id="3-批处理"><a href="#3-批处理" class="headerlink" title="3.批处理"></a>3.批处理</h2><p>要使用批处理，需要先在Edit-&gt;ProjectSetting-&gt;Player-&gt;OtherSetting下勾选<code>Static Batching</code>和<code>Dynamic Batching</code>。</p><p>批处理的物体必须拥有相同的材质。（在建模时，将所有模型的贴图放到一个图集中，这样就可以使用同一个材质了。）</p><h3 id="静态批处理"><a href="#静态批处理" class="headerlink" title="静态批处理"></a>静态批处理</h3><p>勾选物体<code>Inspecter-&gt;Static</code>下的<code>Batching Static</code>，unity就会在运行初始对该物体进行静态批处理。</p><p>静态批处理的物体在运行时是不可以移动的，并且会消耗大量内存。</p><h3 id="动态批处理"><a href="#动态批处理" class="headerlink" title="动态批处理"></a>动态批处理</h3><p>对于动态的物体，unity会自动的进行动态批处理，不过只会针对点数较小的模型。<br>缺点：会增加CPU运行时的开销。</p><p>参考：<a href="https://docs.unity3d.com/cn/current/Manual/DrawCallBatching.html" target="_blank" rel="noopener">https://docs.unity3d.com/cn/current/Manual/DrawCallBatching.html</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h2 id=&quot;1-为什么使用批处理？&quot;&gt;&lt;a href=&quot;#1-为什么使用批处理？&quot; class=&quot;headerlink&quot; title=&quot;1.为什么使用批处理？&quot;&gt;&lt;/a&gt;1.为什么使用批处理？&lt;/h2&gt;&lt;p&gt;商店进货时，进货量越大，总的运输成本就越低。比如一次运一千箱；和每次
-      
-    
-    </summary>
-    
-    
-    
-      <category term="unity" scheme="http://068089dy.github.io/tags/unity/"/>
-    
-      <category term="DrawCall" scheme="http://068089dy.github.io/tags/DrawCall/"/>
-    
-      <category term="批处理" scheme="http://068089dy.github.io/tags/%E6%89%B9%E5%A4%84%E7%90%86/"/>
-    
-  </entry>
-  
-  <entry>
     <title>Unity使用RayMarching渲染一个黑洞</title>
     <link href="http://068089dy.github.io/2022/02/02/2022-02-02-unity-make-blackhole/"/>
     <id>http://068089dy.github.io/2022/02/02/2022-02-02-unity-make-blackhole/</id>
@@ -191,6 +163,34 @@
       <category term="RayMarching" scheme="http://068089dy.github.io/tags/RayMarching/"/>
     
       <category term="黑洞" scheme="http://068089dy.github.io/tags/%E9%BB%91%E6%B4%9E/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Unity批处理</title>
+    <link href="http://068089dy.github.io/2021/06/24/2021-06-24-unity-draw-call-batching/"/>
+    <id>http://068089dy.github.io/2021/06/24/2021-06-24-unity-draw-call-batching/</id>
+    <published>2021-06-24T09:01:46.000Z</published>
+    <updated>2025-12-26T10:03:25.959Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="1-为什么使用批处理？"><a href="#1-为什么使用批处理？" class="headerlink" title="1.为什么使用批处理？"></a>1.为什么使用批处理？</h2><p>商店进货时，进货量越大，总的运输成本就越低。比如一次运一千箱；和每次运一箱，运一千次，肯定后者的开销更大。</p><p>图形渲染时也一样，CPU在向GPU发起DrawCall时，每次要尽可能多的传输数据，来减少调用次数。</p><h2 id="2-如何减少DrawCall"><a href="#2-如何减少DrawCall" class="headerlink" title="2.如何减少DrawCall"></a>2.如何减少DrawCall</h2><p>1.在建模时，将大量的模型合并成一个网格，这样CPU就可以一次DrawCall把数据传给GPU。但是这种方法不够灵活，模型在unity中无法修改。</p><p>2.使用批处理。</p><h2 id="3-批处理"><a href="#3-批处理" class="headerlink" title="3.批处理"></a>3.批处理</h2><p>要使用批处理，需要先在Edit-&gt;ProjectSetting-&gt;Player-&gt;OtherSetting下勾选<code>Static Batching</code>和<code>Dynamic Batching</code>。</p><p>批处理的物体必须拥有相同的材质。（在建模时，将所有模型的贴图放到一个图集中，这样就可以使用同一个材质了。）</p><h3 id="静态批处理"><a href="#静态批处理" class="headerlink" title="静态批处理"></a>静态批处理</h3><p>勾选物体<code>Inspecter-&gt;Static</code>下的<code>Batching Static</code>，unity就会在运行初始对该物体进行静态批处理。</p><p>静态批处理的物体在运行时是不可以移动的，并且会消耗大量内存。</p><h3 id="动态批处理"><a href="#动态批处理" class="headerlink" title="动态批处理"></a>动态批处理</h3><p>对于动态的物体，unity会自动的进行动态批处理，不过只会针对点数较小的模型。<br>缺点：会增加CPU运行时的开销。</p><p>参考：<a href="https://docs.unity3d.com/cn/current/Manual/DrawCallBatching.html" target="_blank" rel="noopener">https://docs.unity3d.com/cn/current/Manual/DrawCallBatching.html</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;1-为什么使用批处理？&quot;&gt;&lt;a href=&quot;#1-为什么使用批处理？&quot; class=&quot;headerlink&quot; title=&quot;1.为什么使用批处理？&quot;&gt;&lt;/a&gt;1.为什么使用批处理？&lt;/h2&gt;&lt;p&gt;商店进货时，进货量越大，总的运输成本就越低。比如一次运一千箱；和每次
+      
+    
+    </summary>
+    
+    
+    
+      <category term="unity" scheme="http://068089dy.github.io/tags/unity/"/>
+    
+      <category term="DrawCall" scheme="http://068089dy.github.io/tags/DrawCall/"/>
+    
+      <category term="批处理" scheme="http://068089dy.github.io/tags/%E6%89%B9%E5%A4%84%E7%90%86/"/>
     
   </entry>
   

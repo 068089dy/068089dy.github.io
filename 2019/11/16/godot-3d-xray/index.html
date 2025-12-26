@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="参考：godot shading language文档Godot Advanced post-processingOpenGL投影矩阵 深度缓冲（z-buffer）与深度测试深度缓冲中存放了每一个点到视点的深度信息，离视点越近深度越浅。按理说离得近的物体会挡住离得远的，那么深度越浅自然也应该优先显示出来，深度测试就是来做这件事的，如果当前点的深度比缓冲区中对应的点要浅，那么就覆盖显示。 如何透视">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Godot实现3D透视效果">
+<meta property="og:url" content="http://068089dy.github.io/2019/11/16/godot-3d-xray/index.html">
+<meta property="og:site_name" content="068089DY">
+<meta property="og:description" content="参考：godot shading language文档Godot Advanced post-processingOpenGL投影矩阵 深度缓冲（z-buffer）与深度测试深度缓冲中存放了每一个点到视点的深度信息，离视点越近深度越浅。按理说离得近的物体会挡住离得远的，那么深度越浅自然也应该优先显示出来，深度测试就是来做这件事的，如果当前点的深度比缓冲区中对应的点要浅，那么就覆盖显示。 如何透视">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://068089dy.github.io/images/godot-3d-xray/a.gif">
+<meta property="og:image" content="http://068089dy.github.io/images/godot-3d-xray/xray-0.png">
+<meta property="og:image" content="http://068089dy.github.io/images/godot-3d-xray/xray-2.png">
+<meta property="og:image" content="http://068089dy.github.io/images/godot-3d-xray/a.gif">
+<meta property="article:published_time" content="2019-11-16T09:01:46.000Z">
+<meta property="article:modified_time" content="2025-12-26T08:39:26.571Z">
+<meta property="article:author" content="068089DY">
+<meta property="article:tag" content="godot 独立游戏 unity">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://068089dy.github.io/images/godot-3d-xray/a.gif">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Godot实现3D透视效果</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="068089DY" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/friends/">Friends</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2019/12/01/godot-import-animation-from-mixamo/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://068089dy.github.io/2019/11/16/godot-3d-xray/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&text=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&is_video=false&description=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Godot实现3D透视效果&body=Check out this article: http://068089dy.github.io/2019/11/16/godot-3d-xray/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&name=Godot实现3D透视效果&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#深度缓冲（z-buffer）与深度测试"><span class="toc-number">1.</span> <span class="toc-text">深度缓冲（z-buffer）与深度测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何透视"><span class="toc-number">2.</span> <span class="toc-text">如何透视</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#区分被遮挡的部分"><span class="toc-number">3.</span> <span class="toc-text">区分被遮挡的部分</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Godot实现3D透视效果
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">068089DY</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2019-11-16T09:01:46.000Z" itemprop="datePublished">2019-11-16</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p><img src="/images/godot-3d-xray/a.gif" alt="3"></p>
+<p>参考：<br><a href="https://docs.godotengine.org/en/3.0/tutorials/shading/shading_language.html" target="_blank" rel="noopener">godot shading language文档</a><br><a href="https://docs.godotengine.org/en/3.1/tutorials/shading/advanced_postprocessing.html" target="_blank" rel="noopener">Godot Advanced post-processing</a><br><a href="https://zhuanlan.zhihu.com/p/74726302" target="_blank" rel="noopener">OpenGL投影矩阵</a></p>
+<h2 id="深度缓冲（z-buffer）与深度测试"><a href="#深度缓冲（z-buffer）与深度测试" class="headerlink" title="深度缓冲（z-buffer）与深度测试"></a>深度缓冲（z-buffer）与深度测试</h2><p><code>深度缓冲</code>中存放了每一个点到视点的深度信息，离视点越近深度越浅。按理说离得近的物体会挡住离得远的，那么深度越浅自然也应该优先显示出来，<code>深度测试</code>就是来做这件事的，如果当前点的深度比缓冲区中对应的点要浅，那么就覆盖显示。</p>
+<h2 id="如何透视"><a href="#如何透视" class="headerlink" title="如何透视"></a>如何透视</h2><p>要想让被挡住的物体显示出来，只需关闭深度测试即可。在godot中，将渲染模式改为depth_test_disable。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shader_type spatial;</span><br><span class="line">render_mode depth_test_disable;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/godot-3d-xray/xray-0.png" alt="1"></p>
+<p>为了标记透视物体，我们将物体渲染为红色，不然可能会产生物体本来就在前面的视觉错误。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">shader_type spatial;</span><br><span class="line">render_mode depth_test_disable;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">fragment</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ALBEDO = vec3(<span class="number">1.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>); <span class="comment">// use red for material albedo</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/images/godot-3d-xray/xray-2.png" alt="2"></p>
+<h2 id="区分被遮挡的部分"><a href="#区分被遮挡的部分" class="headerlink" title="区分被遮挡的部分"></a>区分被遮挡的部分</h2><p>现在将被挡住的部分显示为红色，没有被挡住的不变化。这里使用了深度纹理来获取像素点的深度，当像素点被挡住时，depth会小于1，没被挡住时大于1。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">shader_type spatial;</span><br><span class="line"></span><br><span class="line">render_mode depth_test_disable;</span><br><span class="line"></span><br><span class="line">void fragment() &#123;</span><br><span class="line">	float depth &#x3D; texture(DEPTH_TEXTURE, SCREEN_UV).x;</span><br><span class="line">	if (depth &lt; 1.0)&#123;</span><br><span class="line">		ALBEDO &#x3D; vec3(1.0, 0.0, 0.0);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br><img src="/images/godot-3d-xray/a.gif" alt="3"></p>
+
+  </div>
+</article>
+
+<!-- 下面添加 Gitalk 部分 -->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+    <script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+    <div id="gitalk-container"></div>
+    <script type="text/javascript">
+        var gitalk = new Gitalk({
+            clientID: '85135edefe4f0cf75c48',
+            clientSecret: '096df480f591b7fd5d7451f084dca29120c21c87',
+            id: md5(window.location.pathname),
+            repo: '068089dy.github.io',
+            owner: '068089dy',
+            admin: '068089dy',
+            distractionFreeMode: ''
+        })
+        gitalk.render('gitalk-container')
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/friends/">Friends</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#深度缓冲（z-buffer）与深度测试"><span class="toc-number">1.</span> <span class="toc-text">深度缓冲（z-buffer）与深度测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何透视"><span class="toc-number">2.</span> <span class="toc-text">如何透视</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#区分被遮挡的部分"><span class="toc-number">3.</span> <span class="toc-text">区分被遮挡的部分</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://068089dy.github.io/2019/11/16/godot-3d-xray/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&text=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&is_video=false&description=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Godot实现3D透视效果&body=Check out this article: http://068089dy.github.io/2019/11/16/godot-3d-xray/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&title=Godot实现3D透视效果" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://068089dy.github.io/2019/11/16/godot-3d-xray/&name=Godot实现3D透视效果&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2025 068089DY
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/friends/">Friends</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight .code pre").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      target: function(trigger) {
+        return trigger.nextElementSibling;
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</body>
+</html>

@@ -71,9 +71,9 @@
     
       <category term="unity" scheme="http://068089dy.github.io/tags/unity/"/>
     
-      <category term="Shader" scheme="http://068089dy.github.io/tags/Shader/"/>
-    
       <category term="ShaderGraph" scheme="http://068089dy.github.io/tags/ShaderGraph/"/>
+    
+      <category term="Shader" scheme="http://068089dy.github.io/tags/Shader/"/>
     
   </entry>
   
@@ -131,9 +131,9 @@
     
       <category term="unity" scheme="http://068089dy.github.io/tags/unity/"/>
     
-      <category term="Shader" scheme="http://068089dy.github.io/tags/Shader/"/>
-    
       <category term="ShaderGraph" scheme="http://068089dy.github.io/tags/ShaderGraph/"/>
+    
+      <category term="Shader" scheme="http://068089dy.github.io/tags/Shader/"/>
     
   </entry>
   
@@ -221,11 +221,11 @@
     
       <category term="postprocessing" scheme="http://068089dy.github.io/tags/postprocessing/"/>
     
-      <category term="后处理" scheme="http://068089dy.github.io/tags/%E5%90%8E%E5%A4%84%E7%90%86/"/>
-    
       <category term="shader" scheme="http://068089dy.github.io/tags/shader/"/>
     
       <category term="着色器" scheme="http://068089dy.github.io/tags/%E7%9D%80%E8%89%B2%E5%99%A8/"/>
+    
+      <category term="后处理" scheme="http://068089dy.github.io/tags/%E5%90%8E%E5%A4%84%E7%90%86/"/>
     
   </entry>
   

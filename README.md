@@ -23,3 +23,6 @@ hexo g
 hexo clean && hexo g && hexo d
 
 `hexo d`失败的话，可以尝试`npm update`一下。
+
+
+注：记得save分支的需要git提交。

@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>Unity DOTS学习记录(二)-最简示例</title>
+      <link href="/2025/12/28/2025-12-28-unity-dots-2/"/>
+      <url>/2025/12/28/2025-12-28-unity-dots-2/</url>
+      
+        <content type="html"><![CDATA[<p>环境：<br>Unity：6000.2.10f1<br>Entities：1.4.3</p><p>参考：<br><a href="https://github.com/Unity-Technologies/EntityComponentSystemSamples" target="_blank" rel="noopener">https://github.com/Unity-Technologies/EntityComponentSystemSamples</a></p><h2 id="1-创建子场景"><a href="#1-创建子场景" class="headerlink" title="1. 创建子场景"></a>1. 创建子场景</h2><p>在场景Hierarchy中右键-&gt;New Sub Scene：<br><img src="/images/2025-12-28-unity-dots-2/1.png" alt=""></p><p>使用子场景是因为ECS实体并不能直接存在于普通的Scene中，而是通过SubScene在运行前进行烘焙，转化为高效的Entity数据。</p><h2 id="2-在子场景中创建一个Cube"><a href="#2-在子场景中创建一个Cube" class="headerlink" title="2. 在子场景中创建一个Cube"></a>2. 在子场景中创建一个Cube</h2><p><img src="/images/2025-12-28-unity-dots-2/2.png" alt=""></p><h2 id="3-编写Entity和Component"><a href="#3-编写Entity和Component" class="headerlink" title="3. 编写Entity和Component"></a>3. 编写Entity和Component</h2><p>创建RotationSpeedAuthoring脚本，并挂载到Cube上：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一个Authoring就是一个普通的MonoBehavior</span></span><br><span class="line">public class RotationSpeedAuthoring : MonoBehaviour</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">float</span> DegreesPerSecond = <span class="number">360.0f</span>;</span><br><span class="line">    <span class="comment">// Baker会将Authoring烘焙为实体</span></span><br><span class="line">    class Baker : Baker&lt;RotationSpeedAuthoring&gt;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> override <span class="keyword">void</span> <span class="title">Bake</span><span class="params">(RotationSpeedAuthoring authoring)</span></span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">            <span class="comment">// The entity will be moved</span></span><br><span class="line">            <span class="keyword">var</span> entity = GetEntity(TransformUsageFlags.Dynamic);</span><br><span class="line">            <span class="comment">// 为实体添加组件数据</span></span><br><span class="line">            AddComponent(entity, <span class="keyword">new</span> RotationSpeed &#123; RadiansPerSecond = math.radians(authoring.DegreesPerSecond) &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 组件即数据</span></span><br><span class="line"><span class="keyword">public</span> struct RotationSpeed : IComponentData</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">float</span> RadiansPerSecond;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这里Authoring的作用只是为了烘焙实体，运行时并不会存在。</p><h2 id="4-System逻辑"><a href="#4-System逻辑" class="headerlink" title="4. System逻辑"></a>4. System逻辑</h2><p>创建RotationSystem，无需挂载到任何地方，DOTS会自动识别。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> partial struct RotationSystem : ISystem</span><br><span class="line">&#123;</span><br><span class="line">    [BurstCompile]</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">OnCreate</span><span class="params">(ref SystemState state)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// 这样可以避免场景中不存在相关实体时，System 仍然每帧执行 OnUpdate</span></span><br><span class="line">        state.RequireForUpdate&lt;RotationSpeed&gt;();</span><br><span class="line">    &#125;</span><br><span class="line">    [BurstCompile]</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">OnUpdate</span><span class="params">(ref SystemState state)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">float</span> deltaTime = SystemAPI.Time.DeltaTime;</span><br><span class="line">        <span class="comment">// 查询所有包含LocalTransform和RotationSpeed组件的实体</span></span><br><span class="line">        foreach (<span class="keyword">var</span> (transform, speed) in</span><br><span class="line">                 SystemAPI.Query&lt;RefRW&lt;LocalTransform&gt;, RefRO&lt;RotationSpeed&gt;&gt;())</span><br><span class="line">        &#123;</span><br><span class="line">            transform.ValueRW = transform.ValueRO.RotateY(</span><br><span class="line">                speed.ValueRO.RadiansPerSecond * deltaTime);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p><strong>SystemAPI.Query</strong>会返回<strong>内存中连续排列的组件数据块（Chunk）</strong>。</p><p>开启<strong>[BurstCompile]</strong>会将该循环编译为高度优化的SIMD代码（SIMD是一种CPU并行计算方式）。</p><p>运行场景即可看到Cube在旋转。</p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> unity </tag>
+            
+            <tag> ECS </tag>
+            
+            <tag> 面向数据 </tag>
+            
+            <tag> 高性能 </tag>
+            
+            <tag> DOTS </tag>
+            
+            <tag> SIMD </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Unity DOTS学习记录(一)-ECS架构</title>
       <link href="/2025/12/26/2025-12-26-unity-dots-1/"/>
       <url>/2025/12/26/2025-12-26-unity-dots-1/</url>
@@ -43,9 +72,9 @@
             
             <tag> unity </tag>
             
-            <tag> ShaderGraph </tag>
-            
             <tag> Shader </tag>
+            
+            <tag> ShaderGraph </tag>
             
         </tags>
       
@@ -91,9 +120,9 @@
             
             <tag> unity </tag>
             
-            <tag> ShaderGraph </tag>
-            
             <tag> Shader </tag>
+            
+            <tag> ShaderGraph </tag>
             
         </tags>
       

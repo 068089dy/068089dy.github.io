@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://068089dy.github.io/"/>
-  <updated>2025-12-28T07:42:02.083Z</updated>
+  <updated>2025-12-31T08:27:13.442Z</updated>
   <id>http://068089dy.github.io/</id>
   
   <author>
@@ -15,6 +15,75 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Unity DOTS学习记录(四)-内存模型</title>
+    <link href="http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/"/>
+    <id>http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/</id>
+    <published>2025-12-31T08:30:46.000Z</published>
+    <updated>2025-12-31T08:27:13.442Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="Chunk"><a href="#Chunk" class="headerlink" title="Chunk"></a>Chunk</h2><p>在DOTS中，ECS会将实体数据组织在固定大小的内存块中，每个内存块大小为16KB，称为一个Chunk。Chunk是DOTS内存管理和调度的基本单元。</p><p>一个Chunk的整体结构如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────────┐</span><br><span class="line">│ Chunk Header                 │  ← 元数据</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│ Component Data (SoA)         │  ← 实体数据</span><br><span class="line">└──────────────────────────────┘</span><br></pre></td></tr></table></figure></p><h3 id="Chunk-Header（组件数据）"><a href="#Chunk-Header（组件数据）" class="headerlink" title="Chunk Header（组件数据）"></a>Chunk Header（组件数据）</h3><p><strong>Chunk Header</strong>中存放的是<strong>描述这块Chunk如何被ECS管理和解释的元数据</strong>，主要包括：</p><ul><li>Archetype(架构)：组件类型，组件大小，每个组件数组在Chunk中的偏移(*)</li><li>EntityCount：实体数量(int)</li><li>ChangeVersion：每个组件的修改版本（uint[]）</li></ul><p>Chunk Header的大小通常在几百字节以内，占整个Chunk的比例很小，绝大多数空间用于存放组件数据。</p><h3 id="Component-Data"><a href="#Component-Data" class="headerlink" title="Component Data"></a>Component Data</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">RotationSpeed</span> :</span> IComponentData</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">float</span> RadiansPerSecond;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>以组件<code>RotationSpeed</code>为例，包含这个组件的Entity在Chunk中的实际内存布局如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Chunk (16 KB)</span><br><span class="line">┌─────────────────────────────────┐</span><br><span class="line">│ Chunk Header                    │</span><br><span class="line">│ - Archetype                     │</span><br><span class="line">│ - EntityCount                   │</span><br><span class="line">│ - ChangeVersion                 │</span><br><span class="line">├─────────────────────────────────┤</span><br><span class="line">│ LocalTransform[]                │</span><br><span class="line">│ A[0]  A[1]  A[2] ...            │</span><br><span class="line">├─────────────────────────────────┤</span><br><span class="line">│ RotationSpeed[]                 │</span><br><span class="line">│ B[0]  B[1]  B[2] ...            │</span><br><span class="line">└─────────────────────────────────┘</span><br></pre></td></tr></table></figure></p><h2 id="高效的数据访问方式"><a href="#高效的数据访问方式" class="headerlink" title="高效的数据访问方式"></a>高效的数据访问方式</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">foreach (<span class="keyword">var</span> (transform, speed) in</span><br><span class="line">         SystemAPI.Query&lt;RefRW&lt;LocalTransform&gt;, RefRO&lt;RotationSpeed&gt;&gt;())</span><br></pre></td></tr></table></figure><p>在执行这个遍历时,ECS底层其实是将每个Chunk中的组件进行遍历：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each Chunk:</span><br><span class="line">    <span class="keyword">for</span> i in <span class="number">0.</span>.EntityCount:</span><br><span class="line">        transform = LocalTransform[i]</span><br><span class="line">        speed     = RotationSpeed[i]</span><br></pre></td></tr></table></figure><br>这种连续存储的的方式可以提高Cache命中率，在连续访问中便于CPU预取。</p><h2 id="JobEntity-与-Chunk-并行"><a href="#JobEntity-与-Chunk-并行" class="headerlink" title="JobEntity 与 Chunk 并行"></a>JobEntity 与 Chunk 并行</h2><p>当使用<code>IJobEntity</code>或<code>ScheduleParallel()</code>时：</p><ul><li>不同Chunk之间可以并行处理</li><li>每个Job通常负责一个或多个Chunk</li><li>无需显式加锁，ECS已在Chunk层面保证安全</li></ul><p>这也是ECS能在大量实体场景下保持高性能的关键原因。</p><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Chunk的设计决定了：ECS适合“小而多”的实体，不适合“大而少”的实体；当单个Entity接近Chunk大小时，ECS的性能优势将大幅减弱。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;Chunk&quot;&gt;&lt;a href=&quot;#Chunk&quot; class=&quot;headerlink&quot; title=&quot;Chunk&quot;&gt;&lt;/a&gt;Chunk&lt;/h2&gt;&lt;p&gt;在DOTS中，ECS会将实体数据组织在固定大小的内存块中，每个内存块大小为16KB，称为一个Chunk。Chunk是
+      
+    
+    </summary>
+    
+    
+    
+      <category term="unity" scheme="http://068089dy.github.io/tags/unity/"/>
+    
+      <category term="ECS" scheme="http://068089dy.github.io/tags/ECS/"/>
+    
+      <category term="面向数据" scheme="http://068089dy.github.io/tags/%E9%9D%A2%E5%90%91%E6%95%B0%E6%8D%AE/"/>
+    
+      <category term="高性能" scheme="http://068089dy.github.io/tags/%E9%AB%98%E6%80%A7%E8%83%BD/"/>
+    
+      <category term="DOTS" scheme="http://068089dy.github.io/tags/DOTS/"/>
+    
+      <category term="SIMD" scheme="http://068089dy.github.io/tags/SIMD/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Unity DOTS学习记录(三)-JobEntity</title>
+    <link href="http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-3/"/>
+    <id>http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-3/</id>
+    <published>2025-12-31T03:10:46.000Z</published>
+    <updated>2025-12-31T08:27:58.162Z</updated>
+    
+    <content type="html"><![CDATA[<p>环境：<br>Unity：6000.2.10f1<br>Entities：1.4.3</p><p>参考：<br><a href="https://github.com/Unity-Technologies/EntityComponentSystemSamples" target="_blank" rel="noopener">https://github.com/Unity-Technologies/EntityComponentSystemSamples</a></p><p>在<a href="http://matchding.top/2025/12/28/2025-12-28-unity-dots-2/" target="_blank" rel="noopener">上一篇</a>中，我们在<strong>RotationSystem</strong>里通过<strong>SystemAPI.Query + foreach</strong>的方式遍历实体，实现旋转逻辑：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">foreach (<span class="keyword">var</span> (transform, speed) in</span><br><span class="line">         SystemAPI.Query&lt;RefRW&lt;LocalTransform&gt;, RefRO&lt;RotationSpeed&gt;&gt;())</span><br><span class="line">&#123;</span><br><span class="line">    transform.ValueRW = transform.ValueRO.RotateY(</span><br><span class="line">        speed.ValueRO.RadiansPerSecond * deltaTime);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这种方式上手简单，但在实体数量较大时，并不是最优解。原因如下：</p><ul><li><ol><li>依然运行在主线程，无法利用多核优势</li></ol></li><li><ol><li>依旧是顺序执行，没有并行</li></ol></li></ul><h2 id="使用JobEntity来提高执行效率"><a href="#使用JobEntity来提高执行效率" class="headerlink" title="使用JobEntity来提高执行效率"></a>使用JobEntity来提高执行效率</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[BurstCompile]</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">override</span> <span class="keyword">void</span> <span class="title">OnUpdate</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;   </span><br><span class="line">    <span class="comment">// 并行执行</span></span><br><span class="line">    var job = <span class="keyword">new</span> RotateAndScaleJob</span><br><span class="line">    &#123;</span><br><span class="line">        DeltaTime = SystemAPI.Time.DeltaTime, ElapsedTime = (<span class="keyword">float</span>)SystemAPI.Time.ElapsedTime</span><br><span class="line">    &#125;;</span><br><span class="line">    job.Schedule();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">[BurstCompile]</span><br><span class="line">partial <span class="class"><span class="keyword">struct</span> <span class="title">RotateAndScaleJob</span> :</span> IJobEntity</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">float</span> DeltaTime;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">float</span> ElapsedTime;</span><br><span class="line">    <span class="comment">// 这里Execute方法的参数会自动匹配所有包含LocalTransform和RotationSpeed组件的实体</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">Execute</span><span class="params">(ref LocalTransform transform, in RotationSpeed speed)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        transform = transform.RotateY(speed.RadiansPerSecond * DeltaTime);</span><br><span class="line">        transform.Scale = math.<span class="built_in">sin</span>(ElapsedTime);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><ul><li>JobEntity默认支持并行调度，不同Chunk之间可以并行操作。</li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;环境：&lt;br&gt;Unity：6000.2.10f1&lt;br&gt;Entities：1.4.3&lt;/p&gt;
+&lt;p&gt;参考：&lt;br&gt;&lt;a href=&quot;https://github.com/Unity-Technologies/EntityComponentSystemSamples&quot; tar
+      
+    
+    </summary>
+    
+    
+    
+      <category term="unity" scheme="http://068089dy.github.io/tags/unity/"/>
+    
+      <category term="ECS" scheme="http://068089dy.github.io/tags/ECS/"/>
+    
+      <category term="面向数据" scheme="http://068089dy.github.io/tags/%E9%9D%A2%E5%90%91%E6%95%B0%E6%8D%AE/"/>
+    
+      <category term="高性能" scheme="http://068089dy.github.io/tags/%E9%AB%98%E6%80%A7%E8%83%BD/"/>
+    
+      <category term="DOTS" scheme="http://068089dy.github.io/tags/DOTS/"/>
+    
+      <category term="SIMD" scheme="http://068089dy.github.io/tags/SIMD/"/>
+    
+  </entry>
   
   <entry>
     <title>Unity DOTS学习记录(二)-最简示例</title>

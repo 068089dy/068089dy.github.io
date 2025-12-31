@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- hexo-inject:begin --><!-- hexo-inject:end --><!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Chunk在DOTS中，ECS会将实体数据组织在固定大小的内存块中，每个内存块大小为16KB，称为一个Chunk。Chunk是DOTS内存管理和调度的基本单元。 一个Chunk的整体结构如下：12345┌──────────────────────────────┐│ Chunk Header                 │  ← 元数据├───────────────────────────">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unity DOTS学习记录(四)-内存模型">
+<meta property="og:url" content="http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/index.html">
+<meta property="og:site_name" content="068089DY">
+<meta property="og:description" content="Chunk在DOTS中，ECS会将实体数据组织在固定大小的内存块中，每个内存块大小为16KB，称为一个Chunk。Chunk是DOTS内存管理和调度的基本单元。 一个Chunk的整体结构如下：12345┌──────────────────────────────┐│ Chunk Header                 │  ← 元数据├───────────────────────────">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-12-31T08:30:46.000Z">
+<meta property="article:modified_time" content="2025-12-31T08:27:13.442Z">
+<meta property="article:author" content="068089DY">
+<meta property="article:tag" content="unity">
+<meta property="article:tag" content="ECS">
+<meta property="article:tag" content="DOTS">
+<meta property="article:tag" content="面向数据">
+<meta property="article:tag" content="SIMD">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Unity DOTS学习记录(四)-内存模型</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="068089DY" type="application/atom+xml" />
+    
+<meta name="generator" content="Hexo 4.2.1"><!-- hexo-inject:begin --><!-- hexo-inject:end --></head>
+
+<body class="max-width mx-auto px3 ltr">    
+      <!-- hexo-inject:begin --><!-- hexo-inject:end --><div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/friends/">Friends</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2025/12/31/2025-12-28-unity-dots-3/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&text=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&title=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&is_video=false&description=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Unity DOTS学习记录(四)-内存模型&body=Check out this article: http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&title=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&title=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&title=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&title=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&name=Unity DOTS学习记录(四)-内存模型&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Chunk"><span class="toc-number">1.</span> <span class="toc-text">Chunk</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Chunk-Header（组件数据）"><span class="toc-number">1.1.</span> <span class="toc-text">Chunk Header（组件数据）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Component-Data"><span class="toc-number">1.2.</span> <span class="toc-text">Component Data</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高效的数据访问方式"><span class="toc-number">2.</span> <span class="toc-text">高效的数据访问方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JobEntity-与-Chunk-并行"><span class="toc-number">3.</span> <span class="toc-text">JobEntity 与 Chunk 并行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Unity DOTS学习记录(四)-内存模型
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">068089DY</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2025-12-31T08:30:46.000Z" itemprop="datePublished">2025-12-31</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/DOTS/" rel="tag">DOTS</a>, <a class="tag-link" href="/tags/ECS/" rel="tag">ECS</a>, <a class="tag-link" href="/tags/SIMD/" rel="tag">SIMD</a>, <a class="tag-link" href="/tags/unity/" rel="tag">unity</a>, <a class="tag-link" href="/tags/%E9%9D%A2%E5%90%91%E6%95%B0%E6%8D%AE/" rel="tag">面向数据</a>, <a class="tag-link" href="/tags/%E9%AB%98%E6%80%A7%E8%83%BD/" rel="tag">高性能</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="Chunk"><a href="#Chunk" class="headerlink" title="Chunk"></a>Chunk</h2><p>在DOTS中，ECS会将实体数据组织在固定大小的内存块中，每个内存块大小为16KB，称为一个Chunk。Chunk是DOTS内存管理和调度的基本单元。</p>
+<p>一个Chunk的整体结构如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────────┐</span><br><span class="line">│ Chunk Header                 │  ← 元数据</span><br><span class="line">├──────────────────────────────┤</span><br><span class="line">│ Component Data (SoA)         │  ← 实体数据</span><br><span class="line">└──────────────────────────────┘</span><br></pre></td></tr></table></figure></p>
+<h3 id="Chunk-Header（组件数据）"><a href="#Chunk-Header（组件数据）" class="headerlink" title="Chunk Header（组件数据）"></a>Chunk Header（组件数据）</h3><p><strong>Chunk Header</strong>中存放的是<strong>描述这块Chunk如何被ECS管理和解释的元数据</strong>，主要包括：</p>
+<ul>
+<li>Archetype(架构)：组件类型，组件大小，每个组件数组在Chunk中的偏移(*)</li>
+<li>EntityCount：实体数量(int)</li>
+<li>ChangeVersion：每个组件的修改版本（uint[]）</li>
+</ul>
+<p>Chunk Header的大小通常在几百字节以内，占整个Chunk的比例很小，绝大多数空间用于存放组件数据。</p>
+<h3 id="Component-Data"><a href="#Component-Data" class="headerlink" title="Component Data"></a>Component Data</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">RotationSpeed</span> :</span> IComponentData</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">float</span> RadiansPerSecond;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以组件<code>RotationSpeed</code>为例，包含这个组件的Entity在Chunk中的实际内存布局如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Chunk (16 KB)</span><br><span class="line">┌─────────────────────────────────┐</span><br><span class="line">│ Chunk Header                    │</span><br><span class="line">│ - Archetype                     │</span><br><span class="line">│ - EntityCount                   │</span><br><span class="line">│ - ChangeVersion                 │</span><br><span class="line">├─────────────────────────────────┤</span><br><span class="line">│ LocalTransform[]                │</span><br><span class="line">│ A[0]  A[1]  A[2] ...            │</span><br><span class="line">├─────────────────────────────────┤</span><br><span class="line">│ RotationSpeed[]                 │</span><br><span class="line">│ B[0]  B[1]  B[2] ...            │</span><br><span class="line">└─────────────────────────────────┘</span><br></pre></td></tr></table></figure></p>
+<h2 id="高效的数据访问方式"><a href="#高效的数据访问方式" class="headerlink" title="高效的数据访问方式"></a>高效的数据访问方式</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">foreach (<span class="keyword">var</span> (transform, speed) in</span><br><span class="line">         SystemAPI.Query&lt;RefRW&lt;LocalTransform&gt;, RefRO&lt;RotationSpeed&gt;&gt;())</span><br></pre></td></tr></table></figure>
+<p>在执行这个遍历时,ECS底层其实是将每个Chunk中的组件进行遍历：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each Chunk:</span><br><span class="line">    <span class="keyword">for</span> i in <span class="number">0.</span>.EntityCount:</span><br><span class="line">        transform = LocalTransform[i]</span><br><span class="line">        speed     = RotationSpeed[i]</span><br></pre></td></tr></table></figure><br>这种连续存储的的方式可以提高Cache命中率，在连续访问中便于CPU预取。</p>
+<h2 id="JobEntity-与-Chunk-并行"><a href="#JobEntity-与-Chunk-并行" class="headerlink" title="JobEntity 与 Chunk 并行"></a>JobEntity 与 Chunk 并行</h2><p>当使用<code>IJobEntity</code>或<code>ScheduleParallel()</code>时：</p>
+<ul>
+<li>不同Chunk之间可以并行处理</li>
+<li>每个Job通常负责一个或多个Chunk</li>
+<li>无需显式加锁，ECS已在Chunk层面保证安全</li>
+</ul>
+<p>这也是ECS能在大量实体场景下保持高性能的关键原因。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Chunk的设计决定了：ECS适合“小而多”的实体，不适合“大而少”的实体；当单个Entity接近Chunk大小时，ECS的性能优势将大幅减弱。</p>
+
+  </div>
+</article>
+
+<!-- 下面添加 Gitalk 部分 -->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+    <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+    <script src="https://cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.min.js"></script>
+    <div id="gitalk-container"></div>
+    <script type="text/javascript">
+        var gitalk = new Gitalk({
+            clientID: '85135edefe4f0cf75c48',
+            clientSecret: '096df480f591b7fd5d7451f084dca29120c21c87',
+            id: md5(window.location.pathname),
+            repo: '068089dy.github.io',
+            owner: '068089dy',
+            admin: '068089dy',
+            distractionFreeMode: ''
+        })
+        gitalk.render('gitalk-container')
+    </script>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/friends/">Friends</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Chunk"><span class="toc-number">1.</span> <span class="toc-text">Chunk</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Chunk-Header（组件数据）"><span class="toc-number">1.1.</span> <span class="toc-text">Chunk Header（组件数据）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Component-Data"><span class="toc-number">1.2.</span> <span class="toc-text">Component Data</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#高效的数据访问方式"><span class="toc-number">2.</span> <span class="toc-text">高效的数据访问方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JobEntity-与-Chunk-并行"><span class="toc-number">3.</span> <span class="toc-text">JobEntity 与 Chunk 并行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&text=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&title=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&is_video=false&description=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Unity DOTS学习记录(四)-内存模型&body=Check out this article: http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&title=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&title=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&title=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&title=Unity DOTS学习记录(四)-内存模型" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://068089dy.github.io/2025/12/31/2025-12-28-unity-dots-4/&name=Unity DOTS学习记录(四)-内存模型&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2025 068089DY
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/friends/">Friends</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight .code pre").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      target: function(trigger) {
+        return trigger.nextElementSibling;
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</body>
+</html>

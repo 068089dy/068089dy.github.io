@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://068089dy.github.io/"/>
-  <updated>2026-02-01T03:16:30.023Z</updated>
+  <updated>2026-03-13T02:47:12.937Z</updated>
   <id>http://068089dy.github.io/</id>
   
   <author>
@@ -15,6 +15,39 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Unity DOTS 多线程中的时序问题</title>
+    <link href="http://068089dy.github.io/2026/03/12/2026-03-12-unity-dots-7/"/>
+    <id>http://068089dy.github.io/2026/03/12/2026-03-12-unity-dots-7/</id>
+    <published>2026-03-12T08:54:46.000Z</published>
+    <updated>2026-03-13T02:47:12.937Z</updated>
+    
+    <content type="html"><![CDATA[<p>环境：<br>Unity：6000.2.10f1<br>Entities：1.4.3</p><p>参考：<br><a href="https://github.com/Unity-Technologies/EntityComponentSystemSamples" target="_blank" rel="noopener">https://github.com/Unity-Technologies/EntityComponentSystemSamples</a></p><h2 id="时序问题"><a href="#时序问题" class="headerlink" title="时序问题"></a>时序问题</h2><p>在DOTS中，系统的执行顺序是由系统组（System Group）和系统更新顺序（Update Order）决定的。当多个系统同时访问同一数据时，可能会出现时序问题，导致数据竞争和不一致。</p><h3 id="1-系统组和更新顺序"><a href="#1-系统组和更新顺序" class="headerlink" title="1.系统组和更新顺序"></a>1.系统组和更新顺序</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">InitializationSystemGroup</span><br><span class="line"> ├─ BeginInitializationEntityCommandBufferSystem</span><br><span class="line"> ├─ (你的 Initialization systems)</span><br><span class="line"> └─ EndInitializationEntityCommandBufferSystem</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">SimulationSystemGroup</span><br><span class="line"> ├─ BeginSimulationEntityCommandBufferSystem</span><br><span class="line"></span><br><span class="line"> ├─ FixedStepSimulationSystemGroup</span><br><span class="line"> │    ├─ BeginFixedStepSimulationEntityCommandBufferSystem</span><br><span class="line"> │    ├─ (Physics &#x2F; Fixed systems) &#x2F;&#x2F;物理系统通常会放在FixedStepSimulationSystemGroup中，因为它们需要以固定的时间步长执行，以确保物理模拟的稳定性和一致性。</span><br><span class="line"> │    └─ EndFixedStepSimulationEntityCommandBufferSystem</span><br><span class="line"></span><br><span class="line"> ├─ SimulationSystemGroup(普通 Simulation Systems)</span><br><span class="line"></span><br><span class="line"> ├─ LateSimulationSystemGroup</span><br><span class="line"> │    ├─ (Late systems)</span><br><span class="line"></span><br><span class="line"> └─ EndSimulationEntityCommandBufferSystem</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">PresentationSystemGroup</span><br><span class="line"> ├─ BeginPresentationEntityCommandBufferSystem</span><br><span class="line"> ├─ (Rendering &#x2F; Hybrid Renderer)</span><br><span class="line"> └─ EndPresentationEntityCommandBufferSystem</span><br></pre></td></tr></table></figure><h3 id="2-数据竞争和不一致"><a href="#2-数据竞争和不一致" class="headerlink" title="2.数据竞争和不一致"></a>2.数据竞争和不一致</h3><p>当多个系统同时访问同一数据时，可能会出现数据竞争和不一致的问题。例如，如果一个系统正在修改一个组件的数据，而另一个系统正在读取同一组件的数据，可能会导致读取到不一致的值。为了解决这个问题，可以使用EntityCommandBuffer来延迟对数据的修改，确保数据的访问是安全的。例如：<br><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">MySystem</span> : <span class="title">SystemBase</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">override</span> <span class="keyword">void</span> <span class="title">OnUpdate</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">var</span> ecb = <span class="keyword">new</span> EntityCommandBuffer(Allocator.Temp);</span><br><span class="line">        ...</span><br><span class="line">        ecb.SetComponent(entity, <span class="keyword">new</span> MyComponent &#123; Value = myComponent.Value &#125;);</span><br><span class="line">        ...</span><br><span class="line">        ecb.Playback(EntityManager);</span><br><span class="line">        ecb.Dispose();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><p>上面是自己创建的EntityCommandBuffer，实际开发中通常会使用系统提供的EntityCommandBufferSystem来创建和管理EntityCommandBuffer，以确保性能和安全性。通过合理地组织系统的执行顺序和使用EntityCommandBuffer来管理数据访问，可以有效地解决DOTS中的时序问题，确保游戏逻辑的正确性和性能的优化。</p><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> ecb =</span><br><span class="line">    SystemAPI</span><br><span class="line">        .GetSingleton&lt;EndSimulationEntityCommandBufferSystem.Singleton&gt;()</span><br><span class="line">        .CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();</span><br></pre></td></tr></table></figure><p>上面的<code>EndSimulationEntityCommandBufferSystem</code>是一个系统，提供了一个EntityCommandBuffer。上面的这个ecb，它会在SimulationSystemGroup的末尾执行(<code>LateSimulationSystemGroup</code>之后)。</p><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> job = <span class="keyword">new</span> SpawnJob</span><br><span class="line">    &#123;</span><br><span class="line">        ECB = ecb,</span><br><span class="line">    &#125;.ScheduleParallel(state.Dependency);</span><br></pre></td></tr></table></figure><p>这个job不一定能在当前帧执行完成。</p><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">state.Dependency = <span class="keyword">new</span> SpawnJob</span><br><span class="line">&#123;</span><br><span class="line">    ECB = ecb,</span><br><span class="line">&#125;.ScheduleParallel(state.Dependency);</span><br></pre></td></tr></table></figure><p>这样写可以保证job在当前系统的依赖关系上执行，确保在LateSimulation前执行完成。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SpawnJob</span><br><span class="line">   ↓</span><br><span class="line">系统依赖链</span><br><span class="line">   ↓</span><br><span class="line">LateSimulation</span><br><span class="line">   ↓</span><br><span class="line">ECB Playback</span><br></pre></td></tr></table></figure></p><p>所以如果需要销毁实体，一般应该放到<code>latesimulationgroup</code>中，修改数据的操作应该放到<code>simulationgroup</code>和<code>fixedsimulationgroup</code>，确保ecb的销毁命令最后执行。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;环境：&lt;br&gt;Unity：6000.2.10f1&lt;br&gt;Entities：1.4.3&lt;/p&gt;
+&lt;p&gt;参考：&lt;br&gt;&lt;a href=&quot;https://github.com/Unity-Technologies/EntityComponentSystemSamples&quot; tar
+      
+    
+    </summary>
+    
+    
+    
+      <category term="unity" scheme="http://068089dy.github.io/tags/unity/"/>
+    
+      <category term="ECS" scheme="http://068089dy.github.io/tags/ECS/"/>
+    
+      <category term="面向数据" scheme="http://068089dy.github.io/tags/%E9%9D%A2%E5%90%91%E6%95%B0%E6%8D%AE/"/>
+    
+      <category term="高性能" scheme="http://068089dy.github.io/tags/%E9%AB%98%E6%80%A7%E8%83%BD/"/>
+    
+      <category term="DOTS" scheme="http://068089dy.github.io/tags/DOTS/"/>
+    
+  </entry>
   
   <entry>
     <title>Unity DOTS学习记录(六)-一些常用操作</title>
